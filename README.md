@@ -27,8 +27,8 @@ This project uses a massive number of libraries, without which this simply would
 - [CodeMirror](https://codemirror.net/)
 - [Bootswatch Themes](https://bootswatch.com/)
 - [Vue-Codemirror](https://surmon-china.github.io/vue-codemirror/)
-- [http://nathancahill.github.io/Split.js/](Split.JS)
-- [https://popper.js.org/](Popper.JS)
+- [Split.JS](http://nathancahill.github.io/Split.js/)
+- [Popper.JS](https://popper.js.org/)
 - Of course, all the people at New England Sci-Tech and the STARS amateur radio club for all the great conversations about assembly code!
 
 ### Modifications to Libraries
