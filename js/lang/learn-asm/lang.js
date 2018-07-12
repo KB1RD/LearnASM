@@ -1,6 +1,6 @@
-languages.eduasm = {memory_bits: 16, tgt_image_size: 32*1024};
+languages.learnasm = {memory_bits: 16, tgt_image_size: 32*1024};
 
-languages.eduasm.make_assembler = function(system) { return {
+languages.learnasm.make_assembler = function(system) { return {
     // Assembler counters
     // Location in the output binary
     counter: 0x0000,
@@ -870,7 +870,7 @@ languages.eduasm.make_assembler = function(system) { return {
     }
 }.init(); };
 
-languages.eduasm.make_cpu = function(system) { return {
+languages.learnasm.make_cpu = function(system) { return {
     constants: {
         reg_pc: 7,
         reg_sp: 6,
@@ -1247,7 +1247,7 @@ languages.eduasm.make_cpu = function(system) { return {
     }
 }; };
 
-languages.eduasm.visual = {
+languages.learnasm.visual = {
     props: ['cpu'],
     data: function() {
         return { 

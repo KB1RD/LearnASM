@@ -25,8 +25,8 @@
     <script src="/LearnASM/js/lang/common.js"></script>
     <script src="/LearnASM/js/lang/components.js"></script>
     
-    <script src="/LearnASM/js/lang/edu-asm/codemirror-mode.js"></script>
-    <script src="/LearnASM/js/lang/edu-asm/lang.js"></script>
+    <script src="/LearnASM/js/lang/learn-asm/codemirror-mode.js"></script>
+    <script src="/LearnASM/js/lang/learn-asm/lang.js"></script>
   </head>
   
   <body>
@@ -103,7 +103,7 @@
         document.getElementById("loading-progress").style.display = "";
         
         $(document).ready(function() {
-          if(!system_init("global", languages.eduasm)) {
+          if(!system_init("global", languages.learnasm)) {
               global.alert_manager.error("Load Error", "Language not found or is corrupt. This is a massive bug.");
           } else {
               var code = cookie_manager.load_json_cookie("code");

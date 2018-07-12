@@ -22,8 +22,6 @@
     
     <script src="/LearnASM/js/lang/common.js"></script>
     <script src="/LearnASM/js/lang/components.js"></script>
-    
-    <script src="/LearnASM/js/lang/edu-asm/lang.js"></script>
   </head>
   
   <body>
@@ -130,7 +128,7 @@
         
         <h4>CPU Setup</h4>
         <p>The CPU setup is very simple. The eight registers are placed along two input busses (SRC0 and SRC1) that feed into two inputs of the ALU. When the correct register is contained in the instruction, the value of a particular register is placed on the SRC0 bus, SRC1 bus, or both. The SRC1 bus is special: It also allows the input of an 8 bit immediate. The ALU interprets the opcode of the instruction and then determines what to do with the input data. During a MOV instruction, for example, it simply passes the SRC1 value along to the output. The output of the ALU then goes into the destination bus, which registers will accept as their value depending on the selected destination register in the instruction.</p>
-        <center style="overflow: auto; width: 100%;"><image src="/trm/cpu.svg" alt="The CPU block diagram"></image></center>
+        <center style="overflow: auto; width: 100%;"><image src="/LearnASM/trm/cpu.svg" alt="The CPU block diagram"></image></center>
         <h5>LDR and STR</h5>
         <p>LDR (load) and STR (store) instructions are accomplished by placing values from SRC0 and SRC1 onto the central bus and values from the central bus onto the destination bus. During these instructions, the ALU does nothing and writes neither 1s nor 0s to it's output, allowing the central bus to control the target register during a LDR instruction. During a STR instruction, no registers are impacted.</p>
         <h5>Flags</h5>
