@@ -997,11 +997,14 @@ languages.learnasm.make_cpu = function(system) { return {
             return (0x0000FFFF & s0) << s1;
         },
         0x0B: function(s0, s1) { // LSR
-            return (0x0000FFFF & s0) >> s1;
+            return ((0x0000FFFF & s0) >> s1)
+                | (0x00010000 & (s0 << s1)); // This just makes sure the carry
+                                             // bit is set
         },
         0x0C: function(s0, s1) { // ASR
             return ((0x00007FFF & s0) >> s1)
-                | ((s0&0x00008000) ? ((0xFFFF8000 >> s1) & 0x0000FFFF) : 0);
+                | ((s0&0x00008000) ? ((0xFFFF8000 >> s1) & 0x0000FFFF) : 0)
+                | (0x00010000 & (s0 << s1)); // Carry bit again
         },
         0x0D: function(s0, s1) { // ROR
             return s0 >> s1;
