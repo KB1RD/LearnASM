@@ -3,7 +3,9 @@ An educational assembly code simulator
 
 ## Getting Started
 Play with the simulator: https://learnasm.kb1rd.net/
+
 Read the TRM: https://learnasm.kb1rd.net/trm/
+
 Learn how to code: Coming Soon!
 
 ## Goals
@@ -19,12 +21,12 @@ Of course, if this all doesn't work, I have written a fairly cool assembly code 
 
 ## Credits
 This project uses a massive number of libraries, without which this simply wouldn't work.
-- [https://vuejs.org/](Vue.JS)
-- [https://getbootstrap.com/](Bootstrap)
-- [https://jquery.com/](jQuery)
-- [https://codemirror.net/](CodeMirror)
-- [https://bootswatch.com/](Bootswatch Themes)
-- [https://surmon-china.github.io/vue-codemirror/](Vue-Codemirror)
+- [Vue.JS](https://vuejs.org/)
+- [Bootstrap](https://getbootstrap.com/)
+- [jQuery](https://jquery.com/)
+- [CodeMirror](https://codemirror.net/)
+- [Bootswatch Themes](https://bootswatch.com/)
+- [Vue-Codemirror](https://surmon-china.github.io/vue-codemirror/)
 - [Split.JS](http://nathancahill.github.io/Split.js/)
 - [Popper.JS](https://popper.js.org/)
 - Of course, all the people at New England Sci-Tech and the STARS amateur radio club for all the great conversations about assembly code!
