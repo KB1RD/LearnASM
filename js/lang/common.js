@@ -698,13 +698,6 @@ function core_init() {
     vue_init();
 }
 
-function load_complete() {
-  $("body").ready(function() {
-    document.getElementById("loading-overlay").style.width = "0%";
-    document.getElementById("loading-overlay").style.padding = "0";
-  });
-}
-
 function system_init(sysid, lang) {
     global.systems[sysid] = make_system();
     

@@ -2,6 +2,12 @@
 
 <html lang="en">
   <head>
+    <meta charset="utf-8">
+    <!-- On mobile, it's easier to use when things aren't squished in -->
+    <!--<meta name="viewport" content="width=device-width">-->
+    <meta name="keywords" content="simulator emulator educational programming assembly learn code how to program">
+    <meta name="description" content="An educational assembly code simulator in your web browser">
+
     <title>LearnASM - Editor</title>
     
     <link rel="stylesheet" href="/LearnASM/css/theme.min.css"></link>
@@ -31,18 +37,6 @@
   
   <body>
     <div id="vue-container">
-      <div class="overlay horiz-center-children" id="loading-overlay" style="width: 100%; padding:20px; background-color: rgb(255,255,255);">
-        <div style="width: 100%">
-          <center id="lbl-requires-js">
-            <h1>This website requires JavaScript.</h1>
-            <p>sorry...</p>
-          </center><br>
-          <div id="loading-progress" class="progress" style="width:100%; display:none;">
-            <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" style="width: 100%; margin: 0 auto;"></div>
-          </div><br>
-        </div>
-      </div>
-      
       <notification-overlay :alert_manager="alert_manager"></notification-overlay>
       <options-modal :options="options"></options-modal>
       
@@ -98,10 +92,6 @@
     
     <!-- Core Init -->
     <script type="text/javascript">
-        // JS libraries may not have loaded yet
-        document.getElementById("lbl-requires-js").style.display = "none";
-        document.getElementById("loading-progress").style.display = "";
-        
         $(document).ready(function() {
           if(!system_init("global", languages.learnasm)) {
               global.alert_manager.error("Load Error", "Language not found or is corrupt. This is a massive bug.");
@@ -139,12 +129,6 @@
           cookie_manager.save_json_cookie("code", global.systems["global"].asm_text);
           global.save_options();
         }, false);
-        
-        load_complete();
-        
-        function show_no_learn_modal() {
-          $("#no-learn-modal").modal('show');
-        }
     </script>
   </body>
 </html>
