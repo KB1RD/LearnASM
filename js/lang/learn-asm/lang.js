@@ -44,12 +44,14 @@ languages.learnasm.make_assembler = function(system) { return {
         if(src1.startsWith("#")) {
             // Parse 8 bit immediate
             var int = parseInt(src1.substr(1, src1.length));
-            if(isNaN(int) || int == undefined || int == null || int > 0xFF) {
+            if(isNaN(int) || int == undefined || int == null 
+                  || (int > 0xFF && instruction.mode != 0x3) 
+                  || (int > 0xFFFF && instruction.mode == 0x3)) {
                 this.asm_error(escapeHtml(src1)+" is an invalid number.");
             } else {
                 instruction.src1 = int;
             }
-        } else if(src1.startsWith("<") && src1.endsWith(">") && supports_lbl) {
+        } else if(src1.startsWith("<") && src1.endsWith(">") && supports_lbl && instruction.mode == 0x3) {
             // Parse label and add the label to the instruction for later update
             instruction[".label"] = src1.substr(1, src1.length-2);
         } else if(src1 in this.constants.registers) {
@@ -78,15 +80,11 @@ languages.learnasm.make_assembler = function(system) { return {
     set_instruction_flags: function(instruction, flags) {
         // Defaults
         instruction.mode = 0x3;
-        instruction.link = false;
         instruction.updateflags = false;
         
         // Iterate over flags
         for(var i = 0; i<flags.length; i++) {
             switch(flags[i]) {
-                case 'l': // Link
-                    instruction.link = true;
-                    break;
                 case 'u': // Update flags
                     instruction.updateflags = true;
                     break;
@@ -219,11 +217,10 @@ languages.learnasm.make_assembler = function(system) { return {
                 }
                 
                 var instruction_str = make_copy(instruction);
-                instruction_str.link = false;
                 instruction_str.updateflags = false;
                 instruction_str.opcd = this.constants.opcodes.str.opcd;
                 instruction_str.src0 = this.constants.registers.sp;
-                this.set_instruction_src1(instruction_str, arg_list[0], false);
+                this.set_instruction_src1(instruction_str, arg_list[0], true);
                 
                 var instruction_add = make_copy(instruction);
                 instruction_add.opcd = this.constants.opcodes.add.opcd;
@@ -256,7 +253,6 @@ languages.learnasm.make_assembler = function(system) { return {
                 }
                 
                 var instruction_ldr = make_copy(instruction);
-                instruction_ldr.link = false;
                 instruction_ldr.updateflags = false;
                 instruction_ldr.opcd = this.constants.opcodes.ldr.opcd;
                 instruction_ldr.dst = this.parse_instruction_register(arg_list[0]);
@@ -275,81 +271,31 @@ languages.learnasm.make_assembler = function(system) { return {
                 // First, resolve the src1 (which will read labels)
                 this.set_instruction_src1(instruction, arg_list[0], true);
                 
-                if(isSafe(instruction[".label"])) {
-                    var label = instruction[".label"];
-                    
-                    // This little trick used the NI (Next Instruction) register
-                    // (also called PC, program counter) to load the pointer
-                    // out of the next memory word!
-                    instruction.opcd = this.constants.opcodes.ldr.opcd;
-                    instruction.dst = this.constants.registers.ni;
-                    instruction.src0 = this.constants.registers.ni;
-                    // We don't need a label in the instruction,
-                    // only in the raw type
-                    instruction[".label"] = undefined;
-                    // LDR ignores this
-                    instruction.src1_imm = true;
-                    instruction.src1 = 255;
-                    
-                    var instructions = [];
-                    
-                    if(instruction.cond != this.constants.cond_codes.al) {
-                        var skip_instruction = {};
-                        
-                        skip_instruction.opcd = this.constants.opcodes.add.opcd;
-                        // A trick to invert the condition code value
-                        skip_instruction.cond = instruction.cond ^ 0x1;
-                        skip_instruction.updateflags = false;
-                        skip_instruction.link = false;
-                        skip_instruction.mode = this.constants.modes.FULL;
-                        skip_instruction.dst = this.constants.registers.pc;
-                        skip_instruction.src0 = this.constants.registers.pc;
-                        // Skip over six bytes (instruction + word - 4 for NI)
-                        // Also skip over the link instruction if that's a thing
-                        skip_instruction.src1 = 0x0002 + instruction.link * 0x4;
-                        skip_instruction.src1_imm = true;
-                        
-                        instructions.push(skip_instruction);
-                    }
-                    
-                    if(instruction.link) {
-                        // Since I'm using the fancy LDR trick, linking just
-                        // doesn't work. So I must write yet *another*
-                        // instruction
-                        instruction.link = false;
-                        
-                        var link_instruction = {};
-                        
-                        link_instruction.opcd = this.constants.opcodes.add.opcd;
-                        // A trick to invert the condition code value
-                        link_instruction.cond = instruction.cond;
-                        link_instruction.updateflags = false;
-                        link_instruction.link = false;
-                        link_instruction.mode = this.constants.modes.FULL;
-                        link_instruction.dst = this.constants.registers.lr;
-                        link_instruction.src0 = this.constants.registers.pc;
-                        // Skip over six bytes (instruction + word - 4 for NI)
-                        link_instruction.src1 = 0x0002;
-                        link_instruction.src1_imm = true;
-                        
-                        instructions.push(link_instruction);
-                    }
-                    
-                    instructions.push(instruction);
-                    // The "raw" type reserves space for the pointer
-                    instructions.push({".type": "raw", ".byte": 0, ".raw": 0, ".label": label});
-                    instructions.push({".type": "raw", ".byte": 1, ".raw": 0, ".label": label});
-                    
-                    // The "raw" type reserves space for the pointer
-                    return instructions;
-                }
-                
                 instruction.opcd = this.constants.opcodes.mov.opcd;
                 instruction.dst = this.constants.registers.ni;
                 instruction.src0 = 0;
                 
                 // The "raw" type reserves space for the pointer
                 return [instruction];
+            },
+            // Branch w/ link
+            "bl": function(instruction, arg_list) {
+                instruction = this.constants.pseudo_opcodes.b.call(this, instruction, arg_list)[0];
+                
+                var link_instruction = {};
+                        
+                link_instruction.opcd = this.constants.opcodes.add.opcd;
+                // A trick to invert the condition code value
+                link_instruction.cond = instruction.cond;
+                link_instruction.updateflags = false;
+                link_instruction.mode = this.constants.modes.FULL;
+                link_instruction.dst = this.constants.registers.lr;
+                link_instruction.src0 = this.constants.registers.ni;
+                link_instruction.src1 = 0x0004;
+                link_instruction.src1_imm = true;
+                
+                // The "raw" type reserves space for the pointer
+                return [link_instruction, instruction];
             },
             // Compare
             "cmp": function(instruction, arg_list) {
@@ -447,7 +393,7 @@ languages.learnasm.make_assembler = function(system) { return {
                     opcode_regex += '|';
                 }
             }
-            opcode_regex += ")([ftbnlu]*)(";
+            opcode_regex += ")([ftbnu]*)(";
             var keys = Object.keys(this.constants.cond_codes);
             for(var i = 0; i<keys.length; i++) {
                 opcode_regex += keys[i];
@@ -506,8 +452,7 @@ languages.learnasm.make_assembler = function(system) { return {
         instruction.dst = this.parse_instruction_register(instruction.dst);
         instruction.src0 = this.parse_instruction_register(instruction.src0);
         // Set the src1 field, but note that only mov supports labels
-        this.set_instruction_src1(instruction, instruction.src1, 
-            instruction.opcd == this.constants.opcodes.mov.opcd);
+        this.set_instruction_src1(instruction, instruction.src1, true);
         
         return [instruction];
     },
@@ -519,18 +464,24 @@ languages.learnasm.make_assembler = function(system) { return {
             
             bytecode |= (instruction.cond & 0x0F) << 0;
             bytecode |= (instruction.opcd & 0x0F) << 4;
-            bytecode |= (instruction.mode & 0x03) << 8;
-            bytecode |= (instruction.updateflags & 0x01) << 10;
-            bytecode |= (instruction.link & 0x01) << 11;
-            bytecode |= (instruction.dst & 0x07) << 12;
-            bytecode |= (instruction.src0 & 0x07) << 15;
+            bytecode |= (instruction.updateflags & 0x01) << 11;
+            bytecode |= (instruction.dst & 0x07) << 8;
+            bytecode |= (instruction.src0 & 0x07) << 12;
             
-            if(instruction.src1_imm) {
-                bytecode |= (1) << 18;
-                bytecode |= (instruction.src1 & 0xFF) << 19;
+            if(instruction.src1_imm && instruction.mode == 0x3) {
+                bytecode |= (1) << 15;
+                bytecode |= (instruction.src1 & 0xFFFF) << 16;
             } else {
-                //bytecode |= (0) << 18;
-                bytecode |= (instruction.src1 & 0x07) << 19;
+                bytecode |= (instruction.mode & 0x03) << 25;
+                if(instruction.src1_imm) {
+                    //bytecode |= (0) << 15;
+                    bytecode |= (1) << 24;
+                    bytecode |= (instruction.src1 & 0xFF) << 16;
+                } else {
+                    //bytecode |= (0) << 15;
+                    //bytecode |= (0) << 24;
+                    bytecode |= (instruction.src1 & 0x07) << 16;
+                }
             }
             
             return bytecode;
@@ -826,6 +777,14 @@ languages.learnasm.make_assembler = function(system) { return {
                     // Raw is really easy...
                     var byte = instruction[".byte"];
                     instruction[".raw"] = (lbl_addr >> byte*8) & 0x000000FF;
+                } else if(instruction[".type"] === "instruction") {
+                    if(instruction.mode == 0x3) {
+                        instruction.src1 = lbl_addr & 0xFFFF;
+                    } else {
+                        this.asm_error("Internal assembler error. This is a bug.");
+                    }
+                } else {
+                    this.asm_error("Internal assembler error. This is a bug.");
                 }
             } else if(isSafe(lname) && !(lname in labels) && 
                     instruction[".byte"] == 0) {
@@ -1100,28 +1059,37 @@ languages.learnasm.make_cpu = function(system) { return {
         if(!this.eval_conds(this.bits(instruction, 0, 4))) { return; }
         this.visual_info.execd = true;
         
-        // Set up variables
-        var mode = this.bits(instruction, 8, 2);
+        // Set up variables. Default to a full-register mode
+        var mode = 0x3;
         
-        var src0 = this.registers[this.bits(instruction, 15, 3)];
+        var src0 = this.registers[this.bits(instruction, 12, 3)];
         var src1;
-        var dstr = this.bits(instruction, 12, 3);
+        var dstr = this.bits(instruction, 8, 3);
         
-        this.visual_info.src0_reg = this.bits(instruction, 15, 3);
-        this.visual_info.dest_reg = this.bits(instruction, 12, 3);
+        this.visual_info.src0_reg = this.bits(instruction, 12, 3);
+        this.visual_info.dest_reg = this.bits(instruction, 8, 3);
         
         // Calculate immediate
-        if(this.bits(instruction, 18, 1) == 1) {
-            src1 = 0x0000 | this.bits(instruction, 19, 8);
-            // Shift over the immediate if operations are being performed on
-            // the top 8 bits so the flags are still modified on a carry, etc.
-            if(mode == 0x2) { src1 <<= 8; }
+        if(this.bits(instruction, 15, 1) == 1) {
+            src1 = this.bits(instruction, 16, 16);
+            debug("SRC1: 16 bit immediate: 0x"+src1.toString(16));
             this.visual_info.immediate = true;
         } else {
-            src1 = this.get_from_mode(mode, 
-                    this.registers[this.bits(instruction, 19, 3)]);
-            this.visual_info.src1_reg = this.bits(instruction, 19, 3);
-            this.visual_info.immediate = false;
+            mode = this.bits(instruction, 25, 2);
+            if(this.bits(instruction, 24, 1)) {
+                src1 = this.bits(instruction, 16, 8);
+                // Shift over the immediate if operations are being performed on
+                // the top 8 bits so the flags are still modified on a carry, etc.
+                if(mode == 0x2) { src1 <<= 8; }
+                debug("SRC1: 8 bit immediate: 0x"+src1.toString(16));
+                this.visual_info.immediate = true;
+            } else {
+                debug("SRC1: Register source");
+                src1 = this.get_from_mode(mode, 
+                        this.registers[this.bits(instruction, 16, 3)]);
+                this.visual_info.src1_reg = this.bits(instruction, 16, 3);
+                this.visual_info.immediate = false;
+            }
         }
         
         // Fetch the opcode
@@ -1147,7 +1115,7 @@ languages.learnasm.make_cpu = function(system) { return {
             // The mode (none, top, bottom, full) will be taken into account later
             if(mode == 0x2) { src1 <<= 8; }
         } else if(opcode == 0x0F) {
-            // STR can neither update flags nor link
+            // STR can't update flags
             this.visual_info.dest_reg = undefined;
             this.visual_info.flags_updated = false;
             switch(mode) {
@@ -1192,7 +1160,7 @@ languages.learnasm.make_cpu = function(system) { return {
         debug("Output: 0x"+out.toString(16));
         
         // Update flags
-        if(this.bits(instruction, 10, 1) == 1) {
+        if(this.bits(instruction, 11, 1) == 1) {
             this.visual_info.flags_updated = true;
             this.cpsr &= !(this.constants.cpsr_c | this.constants.cpsr_v 
                             | this.constants.cpsr_n | this.constants.cpsr_z);
@@ -1207,11 +1175,6 @@ languages.learnasm.make_cpu = function(system) { return {
         } else {
             this.visual_info.flags_updated = false;
             out &= 0x0000FFFF;
-        }
-        
-        // Link if required
-        if(this.bits(instruction, 11, 1) == 1) {
-            this.registers[this.constants.reg_lr] = this.registers[dstr];
         }
         
         // Store the PC before updating
@@ -1239,7 +1202,7 @@ languages.learnasm.make_cpu = function(system) { return {
         
         // Check for a halt
         if(dstr == this.constants.reg_pc && 
-                this.bits(instruction, 10, 1) == 0) {
+                this.bits(instruction, 11, 1) == 0) {
             // Since flags are not updated and the PC is,
             // check for a halt condition.
             

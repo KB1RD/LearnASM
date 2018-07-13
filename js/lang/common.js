@@ -677,13 +677,15 @@ function vue_init() {
       data: global
     });
     
-    vm.$watch('options.enable_debug', function(new_obj,old_obj) {
+    var update_debug_func = function(new_obj,old_obj) {
         if(isSafe(new_obj) && new_obj == true) {
             debug = function(text){ console.log(text); };
         } else {
             debug = function(text){};
         }
-    });
+    };
+    vm.$watch('options.enable_debug', update_debug_func);
+    update_debug_func(global.options.enable_debug, global.options.enable_debug);
 }
 
 function core_init() {
