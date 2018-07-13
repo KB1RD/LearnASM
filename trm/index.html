@@ -112,7 +112,7 @@
               <th scope="row">R5</th>
               <td>LR</td>
               <td>Yes</td>
-              <td>GP. Used by the BL pseudocode. Also used by the deprecated link bit.</td>
+              <td>GP. Used by the BL pseudocode as a link register.</td>
             </tr>
             <tr class="table-secondary">
               <th scope="row">R6</th>
@@ -506,7 +506,7 @@
         
         <h4>Opcode Interpretation</h4>
         <p>Instructions must be in a certain format for the assembler to understand what the user is attempting to write. Generally, the format is as follows:</p>
-        <h5><span class="text-info">opcode</span> + <span class="text-warning">Mode Suffix</span> + <span class="text-danger">Link & Update Suffixes</span> + <span class="text-success">Condition Codes</span>  <span class="text-primary">destination</span>, <span class="text-primary">source</span>, <span class="text-primary">source</span></h5>
+        <h5><span class="text-info">opcode</span> + <span class="text-warning">Mode Suffix</span> + <span class="text-danger">Update Suffix</span> + <span class="text-success">Condition Codes</span>  <span class="text-primary">destination</span>, <span class="text-primary">source</span>, <span class="text-primary">source</span></h5>
         For example, if I wanted to write an "add lower bits on equal with update" instruction, I could write the following:
         <h5><span class="text-info">add</span><span class="text-warning">b</span><span class="text-danger">u</span><span class="text-success">eq</span>  <span class="text-primary">r0</span>, <span class="text-primary">r1</span>, <span class="text-primary">#5</span></h5>
         
@@ -552,8 +552,13 @@
             </tr>
             <tr>
               <th scope="row">b address</th>
-              <td>Branches to a different location by utilizing the NI (next instruction) register to load a 16-bit immediate placed right after the ldr instruction. Additional add and branch instruction are used to handle linking and condition codes, respectively.</td>
-              <td>(add pc, pc, #2/#6)<br/>(add lr, pc, #2)<br/>ldr pc, pc<br/>.word address</td>
+              <td>Branches to a different location.</td>
+              <td>mov ni, address</td>
+            </tr>
+            <tr>
+              <th scope="row">bl address</th>
+              <td>Branches to a different location and links.</td>
+              <td>add lr, ni, #4<br/>mov ni, address</td>
             </tr>
             <tr>
               <th scope="row">cmp a, b</th>
