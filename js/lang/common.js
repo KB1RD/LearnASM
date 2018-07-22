@@ -5,8 +5,8 @@ var global = {};
 global.version = Object.freeze("0.1a");
 
 global.main_navbar = [
-    {name: 'Learn', url: '/LearnASM/learn/'},
-    {name: 'TRM', url: '/LearnASM/trm/'}
+    {name: 'Learn', url: '/learn/'},
+    {name: 'TRM', url: '/trm/'}
   ];
 
 // Why use this? Simple: An "if" statement evaluates 0 to false as well, so
