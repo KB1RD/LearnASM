@@ -77,7 +77,7 @@
             };
             
             if(url) {
-                $("#lesson-container").load(url, {limit: 10}, load_done);
+                $("#lesson-container").load(url, load_done);
             } else {
                 load_done(undefined, window.location.search == "" ? undefined : "error", undefined);
             }
