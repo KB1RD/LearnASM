@@ -1,9 +1,9 @@
 Vue.component('custom-navbar', {
-    props: ['version', 'links', 'sticky'],
+    props: ['version', 'links', 'sticky', 'home'],
     data: function(){ return { window: window }; },
     template: `
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary" v-bind:class="sticky ? 'fixed-top' : ''">
-  <a class="navbar-brand" href="/LearnASM/">Learn<b>ASM</b> <span class="badge badge-danger" v-if="version.endsWith('a')">ALPHA</span><span class="badge badge-warning" v-if="version.endsWith('b')">BETA</span></a>
+  <a class="navbar-brand" :href="home">Learn<b>ASM</b> <span class="badge badge-danger" v-if="version.endsWith('a')">ALPHA</span><span class="badge badge-warning" v-if="version.endsWith('b')">BETA</span></a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#master_navbar"aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
@@ -136,6 +136,83 @@ Vue.component('dialog-modal', {
 </div>
 `
 });
+
+
+// The system container creates and manages the system. See index.html for a
+// usage example
+// Note: ALL PROPERTIES ARE CONSTANTS
+Vue.component('system-container', {
+    props: {sysname: {required: true, type: String}, 
+        default_code: {}, cookie: {}},
+    data: function() {
+        // Check for the name
+        var sysname = this["_props"].sysname;
+        if(!sysname) {
+            throw "Undefined sysname in a system_container";
+        }
+        
+        // Verify that a string is a string and, if not, call an error function
+        // that returns a default value
+        var verify_string = function(code, error_cb) {
+            if(code && typeof code == 'string' || code instanceof String) {
+                return code;
+            } else {
+                return error_cb.call(this);
+            }
+        };
+        
+        var code;
+        var cookie = this["_props"].cookie;
+        // Initialize the system
+        if(!system_init(sysname, languages.learnasm)) {
+            global.alert_manager.error("Load Error", "Language not found or is corrupt. This is a massive bug.");
+            return {};
+        } else {
+            // Check that the cookie is a string
+            cookie = verify_string(cookie, function() { return undefined; });
+            
+            if(cookie) {
+                // Attempt to load the code from a cookie (if present)
+                code = cookie_manager.load_json_cookie(cookie);
+            }
+            
+            // Otherwise, default to the default. If that's not present, default
+            // to no text at all
+            code = verify_string.call(this, code, function() {
+                return verify_string(this["_props"].default_code, function() {
+                    return "";
+                });
+            });
+            
+            // Assign the code
+            global.systems[sysname].asm_text = code;
+        }
+        
+        return {system: global.systems[sysname]};
+    },
+    destroyed: function() {
+        var sysname = this["_props"].sysname;
+        var verify_string = function(code, error_cb) {
+            if(code && typeof code == 'string' || code instanceof String) {
+                return code;
+            } else {
+                return error_cb.call(this);
+            }
+        };
+    
+        cookie = verify_string(cookie, function() { return undefined; });
+        
+        if(cookie) {
+            cookie_manager.save_json_cookie("code", global.systems[sysname].asm_text);
+        }
+    },
+    template: `
+<div><slot :system="system"></slot></div>
+`});
+
+
+// Core panels for each part of the simulator. This way, Learn mode can import
+// components from the normal simulator as needed
 
 Vue.use(window.VueCodemirror);
 Vue.component('core-pane-code', {

@@ -34,21 +34,17 @@
 <!-- Note: I'm using incorrect grammar with the quotes on purpose, so users know to type "halt," but not the comma -->
 <h5>Go ahead and write your first instruction, "<code>halt</code>", in the text prompt below:</h5>
 <p>Once you're done, click run!</p>
-<script type="text/javascript">
-    if(!system_init("first_program", languages.learnasm)) {
-        global.alert_manager.error("Load Error", "Language not found or is corrupt. This is a massive bug.");
-    } else {
-        global.systems.first_program.asm_text = "";
-    }
-</script>
-<center><div class="card border-primary mb-3" style="max-width: 40rem; text-align: left;">
-  <div class="card-header">
-    <ctrl-button-panel :system="systems.first_program" :global="this">
-  </ctrl-button-panel></div>
-  <div class="card-body" style="padding: 0px;">
-    <core-pane-code :system="systems.first_program" :activelines="systems.first_program.active_lines"></core-pane-code>
-  </div>
-</div></center>
+
+<system-container sysname="first_program" default_code=""><template slot-scope="container">
+  <center><div class="card border-primary mb-3" style="max-width: 40rem; text-align: left;">
+    <div class="card-header">
+      <ctrl-button-panel :system="container.system" :global="$root">
+    </ctrl-button-panel></div>
+    <div class="card-body" style="padding: 0px;">
+      <core-pane-code :system="container.system" :activelines="container.system.active_lines"></core-pane-code>
+    </div>
+  </div></center>
+</template></system-container>
 
 <h4>You should see a "Halt condition detected" alert</h4>
 <p>Congradulations! You just wrote your first program! While it may not seem like a very complicated program, the "<code>halt</code>" instruction is critical. Try removing all the text and click run again. You should see an "Undefined Instruction" error. What this means is that the computer tried to read a section of memory with nothing in it. A normal computer wouldn't warn you about this. Instead, it could crash, do something completely random, or worse: it could run, say, a virus that just happens to be stored right after your program.</p>

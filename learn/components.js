@@ -1,3 +1,4 @@
+// The path listing
 Vue.component('path-breadcrumb', {
     props: ['page_controller'],
     template: `
@@ -6,6 +7,7 @@ Vue.component('path-breadcrumb', {
   <li class="breadcrumb-item active" v-for="(part, i) in page_controller.current_page.path">{{page_controller.find_page_with_path(page_controller.pages, page_controller.current_page.path.slice(0,i+1)).title}}</li>
 </ul>
 `});
+// Next/back buttons
 Vue.component('page-control-btns', {
     props: ['page_controller'],
     template: `
@@ -18,6 +20,9 @@ Vue.component('page-control-btns', {
   </div>
 </div></center>
 `});
+
+// One element in the table of contents that may or may not have children
+// For use by the table-of-contents component only
 Vue.component('toc-elem', {
     props: ['page', 'active_path'],
     template: `
@@ -30,6 +35,7 @@ Vue.component('toc-elem', {
   </ol>
 </li>
 `});
+// The actual table of contents
 Vue.component('table-of-contents', {
   props: ['page_controller'],
   template: `
@@ -40,18 +46,7 @@ Vue.component('table-of-contents', {
 </div>
 `});
 
-Vue.component('custom-card', {
-    props: ['title', 'subtitle'],
-    template: `
-<center><div class="card learn-card">
-  <div class="card-body">
-    <h4 class="card-title">{{title}}</h4>
-    <h6 class="card-subtitle mb-2 text-muted">{{subtitle}}</h6>
-    <p class="card-text"><slot></slot></p>
-  </div>
-</div></center>
-`});
-
+// A practice problem container that quizzes the user based on question components.
 Vue.component('practice', {
     props: ['question_count', 'question_controllers'],
     data: function() { return {
@@ -113,35 +108,175 @@ Vue.component('practice', {
 </div></center>
 `});
 
-Vue.component('custom-checkbox', {
-    props: {
-        'value': {},
-        'checked': {},
-        'unchecked': {},
-        'bsclass': {default: "primary"}
+// -------------------------------------------------------------------------- //
+
+// Questions for the practice problem container
+global.qna = {};
+
+// A "problem" used by the problem container to alert the user that they're done
+global.qna.all_done = {
+    template: `
+    <div>
+      <h2>Nice Job!</h2>
+      <h5>You're all done!</h5>
+    </div>
+`
+};
+
+global.qna.mov_imm = {
+    props: ['valid', 'display_incorrect_answer'],
+    data: function() { return {
+        dst: "", 
+        src: "",
+        current: {
+            num: Math.ceil(Math.random()*10), 
+            reg: "r"+Math.floor(Math.random()*7)
+        },
+        update: function() {
+            this.valid = (this.dst == this.current.reg) 
+                      && (this.src == "#"+this.current.num);
+            
+            this.$emit('update:valid', this.valid);
+        }
+    };},
+    watch: {
+        dst: function() { this.update(); },
+        src: function() { this.update(); }
     },
     template: `
-<div class="form-group">
-  <div class="btn-group">
-    <label class="btn" v-bind:class="'btn-'+bsclass" v-on:click="$emit('input', !value)">
-      <span v-if="value">{{checked}}</span>
-      <span v-if="!value">{{unchecked}}</span>
-    </label>
-    <label class="btn disabled" v-bind:class="'btn-'+bsclass">
-      <slot></slot>
-    </label>
-  </div>
+<div>
+  <h5>Task: Move the number {{current.num}} into {{current.reg}}:</h5>
+  <b>
+    <span>mov</span>
+    <input class="form-control col-form-label-sm inline-input-sm" v-model="dst" :class="!valid && display_incorrect_answer ? 'is-invalid' : ''">
+    <span>,</span>
+    <input class="form-control col-form-label-sm inline-input-sm" v-model="src" :class="!valid && display_incorrect_answer ? 'is-invalid' : ''"></input>
+    <div v-if="!valid && display_incorrect_answer">
+        <span class="text-danger">The correct answer is "mov {{current.reg}}, #{{current.num}}"</span>
+    </div>
+  </b>
 </div>
 `
-});
+};
 
-Vue.component('combobox', {
-    props: ['value'],
+global.qna.mov_r2r = {
+    props: ['valid', 'display_incorrect_answer'],
+    data: function() { return {
+        dst: "", 
+        src: "",
+        current: {
+            rd: "r"+Math.floor(Math.random()*7), 
+            rs: "r"+Math.floor(Math.random()*7)
+        },
+        update: function() {
+            this.valid = (this.dst == this.current.rd) 
+                      && (this.src == this.current.rs);
+            
+            this.$emit('update:valid', this.valid);
+        }
+    };},
+    watch: {
+        dst: function() { this.update(); },
+        src: function() { this.update(); }
+    },
     template: `
-<div class="form-group">
-  <select class="custom-select" v-bind:value="value" v-on:click="$emit('input', value)">
-    <slot></slot>
-  </select>
+<div>
+  <h5>Task: Move {{current.rs}} into {{current.rd}}:</h5>
+  <b>
+    <span>mov</span>
+    <input class="form-control col-form-label-sm inline-input-sm" v-model="dst" :class="!valid && display_incorrect_answer ? 'is-invalid' : ''">
+    <span>,</span>
+    <input class="form-control col-form-label-sm inline-input-sm" v-model="src" :class="!valid && display_incorrect_answer ? 'is-invalid' : ''"></input>
+    <div v-if="!valid && display_incorrect_answer">
+        <span class="text-danger">The correct answer is "mov {{current.rd}}, {{current.rs}}"</span>
+    </div>
+  </b>
 </div>
 `
-});
+};
+
+global.qna.bitwise_not = {
+    props: ['valid', 'display_incorrect_answer'],
+    data: function() { return {
+        ans: "",
+        current: {
+            val: Math.floor(Math.random()*64)
+        },
+        update: function() {
+            this.valid = this.ans == ("000000" + (+this.current.val ^ 0x3f).toString(2)).slice(-6);
+            this.$emit('update:valid', this.valid);
+        }
+    };},
+    watch: {
+        ans: function() { this.update(); }
+    },
+    template: `
+<div>
+  <b>
+    <span>NOT {{("000000" + (+current.val).toString(2)).slice(-6)}} = </span>
+    <input class="form-control col-form-label-sm inline-input" v-model="ans" :class="!valid && display_incorrect_answer ? 'is-invalid' : ''"></input>
+    <div v-if="!valid && display_incorrect_answer">
+        <span class="text-danger">The correct answer is "NOT {{("000000" + (+current.val).toString(2)).slice(-6)}} = {{("000000" + (+current.val ^ 0x3f).toString(2)).slice(-6)}}"</span>
+    </div>
+  </b>
+</div>
+`
+};
+
+global.qna.bitwise_and = {
+    props: ['valid', 'display_incorrect_answer'],
+    data: function() { return {
+        ans: "",
+        current: {
+            aval: Math.floor(Math.random()*64),
+            bval: Math.floor(Math.random()*64)
+        },
+        update: function() {
+            this.valid = this.ans == ("000000" + (+this.current.aval & this.current.bval).toString(2)).slice(-6);
+            this.$emit('update:valid', this.valid);
+        }
+    };},
+    watch: {
+        ans: function() { this.update(); }
+    },
+    template: `
+<div>
+  <b>
+    <span>{{("000000" + (+current.aval).toString(2)).slice(-6)}} AND <br/>{{("000000" + (+current.bval).toString(2)).slice(-6)}} = </span>
+    <input class="form-control col-form-label-sm inline-input" v-model="ans" :class="!valid && display_incorrect_answer ? 'is-invalid' : ''"></input>
+    <div v-if="!valid && display_incorrect_answer">
+        <span class="text-danger">The correct answer is "{{("000000" + (+current.aval).toString(2)).slice(-6)}} AND {{("000000" + (+current.bval).toString(2)).slice(-6)}} = {{("000000" + (+current.aval & current.bval).toString(2)).slice(-6)}}"</span>
+    </div>
+  </b>
+</div>
+`
+};
+
+global.qna.bitwise_or = {
+    props: ['valid', 'display_incorrect_answer'],
+    data: function() { return {
+        ans: "",
+        current: {
+            aval: Math.floor(Math.random()*64),
+            bval: Math.floor(Math.random()*64)
+        },
+        update: function() {
+            this.valid = this.ans == ("000000" + (+this.current.aval | this.current.bval).toString(2)).slice(-6);
+            this.$emit('update:valid', this.valid);
+        }
+    };},
+    watch: {
+        ans: function() { this.update(); }
+    },
+    template: `
+<div>
+  <b>
+    <span>{{("000000" + (+current.aval).toString(2)).slice(-6)}} OR <br/>{{("000000" + (+current.bval).toString(2)).slice(-6)}} = </span>
+    <input class="form-control col-form-label-sm inline-input" v-model="ans" :class="!valid && display_incorrect_answer ? 'is-invalid' : ''"></input>
+    <div v-if="!valid && display_incorrect_answer">
+        <span class="text-danger">The correct answer is "{{("000000" + (+current.aval).toString(2)).slice(-6)}} OR {{("000000" + (+current.bval).toString(2)).slice(-6)}} = {{("000000" + (+current.aval | current.bval).toString(2)).slice(-6)}}"</span>
+    </div>
+  </b>
+</div>
+`
+};
