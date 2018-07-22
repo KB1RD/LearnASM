@@ -5,13 +5,9 @@ var global = {};
 global.version = Object.freeze("0.1a");
 
 global.main_navbar = [
-    {name: 'Learn', url: 'javascript:no_learn_mode()'},
-    {name: 'TRM', url: '/LearnASM/trm'}
+    {name: 'Learn', url: '/LearnASM/learn/'},
+    {name: 'TRM', url: '/LearnASM/trm/'}
   ];
-
-function no_learn_mode() {
-    $("#no-learn-modal").modal("show");
-}
 
 // Why use this? Simple: An "if" statement evaluates 0 to false as well, so
 // checking for "safe" numbers doesn't work. It might be a bit over used though...
@@ -36,7 +32,20 @@ function default_object(object, def) {
 
 // This makes me sick, but it looks to be the only way to deep copy stuff in JS
 function make_copy(obj) {
-    return JSON.parse(JSON.stringify(obj));
+    var blank = {};
+    if(obj instanceof Array) {
+        blank = [];
+    }
+    return Object.assign(blank, obj);
+}
+
+function parseIntExtended(str) {
+    if(str.startsWith("0b")) {
+        // I have no idea why JS doesn't support this
+        return parseInt(str.substr(2, str.length), 2);
+    } else {
+        return parseInt(str);
+    }
 }
 
 var entityMap = {
@@ -391,9 +400,7 @@ var make_memory_manager = Object.freeze(function() { return {
 
 // The alert manager is just what makes alerts pop up on the screen
 global.alert_manager = {
-    alerts: [{title: "Warning", body: "This application is alpha. This may have\
-        bugs, may not work, and may never be useful. This is a concept design.",
-        type: "warning"}],
+    alerts: [],
     
     html_alert: function(type, title, body) {
         this.alerts.push({"title": title, "body": body, "type": type});
@@ -524,7 +531,6 @@ var make_system = Object.freeze(function() { return {
         
         if(!this.asm_text) {
             this.asm_text = "";
-            return null;
         }
         
         // Interpretation turns the text into JS objects

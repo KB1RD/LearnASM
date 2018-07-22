@@ -43,7 +43,7 @@ languages.learnasm.make_assembler = function(system) { return {
         instruction.src1_imm = true;
         if(src1.startsWith("#")) {
             // Parse 8 bit immediate
-            var int = parseInt(src1.substr(1, src1.length));
+            var int = parseIntExtended(src1.substr(1, src1.length));
             if(isNaN(int) || int == undefined || int == null 
                   || (int > 0xFF && instruction.mode != 0x3) 
                   || (int > 0xFFFF && instruction.mode == 0x3)) {
@@ -294,7 +294,6 @@ languages.learnasm.make_assembler = function(system) { return {
                 link_instruction.src1 = 0x0004;
                 link_instruction.src1_imm = true;
                 
-                // The "raw" type reserves space for the pointer
                 return [link_instruction, instruction];
             },
             // Compare
@@ -370,6 +369,31 @@ languages.learnasm.make_assembler = function(system) { return {
                 instruction.src0 = 0;
                 instruction.src1 = 1;
                 instruction.src1_imm = true;
+                
+                return [instruction];
+            },
+            // Bitwise Boolean NOT
+            "not": function(instruction, arg_list) {
+                if(!this.check_argument_length(instruction.opcd, arg_list.length, 2)) {
+                    return null;
+                }
+                
+                instruction.dst = this.parse_instruction_register(arg_list[0]);
+                
+                this.set_instruction_src1(instruction, arg_list[1], true);
+                if(instruction.src1_imm) {
+                    instruction.opcd = this.constants.opcodes.mov.opcd;
+                    instruction.src1 ^= instruction.mode == this.constants.modes.FULL ? 0xffffffff : 0x0000ffff;
+                } else {
+                    instruction.opcd = this.constants.opcodes.xor.opcd;
+                    if(instruction.mode == this.constants.modes.NONE) {
+                        this.asm_error("NOT cannot be used with the no-update (n) mode.");
+                    }
+                    
+                    instruction.src0 = instruction.src1;
+                    instruction.src1_imm = true;
+                    instruction.src1 = 0xffffffff;
+                }
                 
                 return [instruction];
             }
