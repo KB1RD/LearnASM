@@ -113,9 +113,15 @@ global.page_controller = {
         var parent = this.find_page_with_path(this.pages, parent_path);
         var children;
         if(!parent || !parent.children) {
-            return undefined;
+            if(parent_path.length != 0) {
+                return undefined;
+            }
         }
-        children = parent.children;
+        if(parent_path.length == 0) {
+            children = this.pages;
+        } else {
+            children = parent.children;
+        }
         
         // Search for the the next child in the parent's children
         var next_item = undefined;
@@ -134,9 +140,10 @@ global.page_controller = {
             if(!next_item) {
                 return undefined;
             }
-            if(next_item.children && next_item.children.length > 0) {
-                next_item = next_item.children[0];
-            }
+        }
+        
+        while(next_item.children && next_item.children.length > 0) {
+            next_item = next_item.children[0];
         }
         return next_item;
     },
@@ -150,9 +157,15 @@ global.page_controller = {
         var parent = this.find_page_with_path(this.pages, parent_path);
         var children;
         if(!parent || !parent.children) {
-            return undefined;
+            if(parent_path.length != 0) {
+                return undefined;
+            }
         }
-        children = parent.children;
+        if(parent_path.length == 0) {
+            children = this.pages;
+        } else {
+            children = parent.children;
+        }
         
         // Search for the the last child in the parent's children
         var last_item = undefined;
@@ -171,9 +184,11 @@ global.page_controller = {
             if(!last_item) {
                 return undefined;
             }
-            if(last_item.children && last_item.children.length > 0) {
-                last_item = last_item.children[last_item.children.length-1];
-            }
+        }
+        
+        // Find the leaf node
+        while(last_item.children && last_item.children.length > 0) {
+            last_item = last_item.children[last_item.children.length-1];
         }
         return last_item;
     },
@@ -213,174 +228,3 @@ global.page_controller.add_page({title: "Step by Step", name: "lesson1", childre
 ]});
 
 global.page_controller.add_page({title: "Coming Soon!", name:"coming_soon"});
-
-// -------------------------------------------------------------------------- //
-
-global.qna = {};
-
-global.qna.all_done = {
-    template: `
-    <div>
-      <h2>Nice Job!</h2>
-      <h5>You're all done!</h5>
-    </div>
-`
-};
-
-global.qna.mov_imm = {
-    props: ['valid', 'display_incorrect_answer'],
-    data: function() { return {
-        dst: "", 
-        src: "",
-        current: {
-            num: Math.ceil(Math.random()*10), 
-            reg: "r"+Math.floor(Math.random()*7)
-        },
-        update: function() {
-            this.valid = (this.dst == this.current.reg) 
-                      && (this.src == "#"+this.current.num);
-            
-            this.$emit('update:valid', this.valid);
-        }
-    };},
-    watch: {
-        dst: function() { this.update(); },
-        src: function() { this.update(); }
-    },
-    template: `
-<div>
-  <h5>Task: Move the number {{current.num}} into {{current.reg}}:</h5>
-  <b>
-    <span>mov</span>
-    <input class="form-control col-form-label-sm inline-input-sm" v-model="dst" :class="!valid && display_incorrect_answer ? 'is-invalid' : ''">
-    <span>,</span>
-    <input class="form-control col-form-label-sm inline-input-sm" v-model="src" :class="!valid && display_incorrect_answer ? 'is-invalid' : ''"></input>
-    <div v-if="!valid && display_incorrect_answer">
-        <span class="text-danger">The correct answer is "mov {{current.reg}}, #{{current.num}}"</span>
-    </div>
-  </b>
-</div>
-`
-};
-
-global.qna.mov_r2r = {
-    props: ['valid', 'display_incorrect_answer'],
-    data: function() { return {
-        dst: "", 
-        src: "",
-        current: {
-            rd: "r"+Math.floor(Math.random()*7), 
-            rs: "r"+Math.floor(Math.random()*7)
-        },
-        update: function() {
-            this.valid = (this.dst == this.current.rd) 
-                      && (this.src == this.current.rs);
-            
-            this.$emit('update:valid', this.valid);
-        }
-    };},
-    watch: {
-        dst: function() { this.update(); },
-        src: function() { this.update(); }
-    },
-    template: `
-<div>
-  <h5>Task: Move {{current.rs}} into {{current.rd}}:</h5>
-  <b>
-    <span>mov</span>
-    <input class="form-control col-form-label-sm inline-input-sm" v-model="dst" :class="!valid && display_incorrect_answer ? 'is-invalid' : ''">
-    <span>,</span>
-    <input class="form-control col-form-label-sm inline-input-sm" v-model="src" :class="!valid && display_incorrect_answer ? 'is-invalid' : ''"></input>
-    <div v-if="!valid && display_incorrect_answer">
-        <span class="text-danger">The correct answer is "mov {{current.rd}}, {{current.rs}}"</span>
-    </div>
-  </b>
-</div>
-`
-};
-
-global.qna.bitwise_not = {
-    props: ['valid', 'display_incorrect_answer'],
-    data: function() { return {
-        ans: "",
-        current: {
-            val: Math.floor(Math.random()*64)
-        },
-        update: function() {
-            this.valid = this.ans == ("000000" + (+this.current.val ^ 0x3f).toString(2)).slice(-6);
-            this.$emit('update:valid', this.valid);
-        }
-    };},
-    watch: {
-        ans: function() { this.update(); }
-    },
-    template: `
-<div>
-  <b>
-    <span>NOT {{("000000" + (+current.val).toString(2)).slice(-6)}} = </span>
-    <input class="form-control col-form-label-sm inline-input" v-model="ans" :class="!valid && display_incorrect_answer ? 'is-invalid' : ''"></input>
-    <div v-if="!valid && display_incorrect_answer">
-        <span class="text-danger">The correct answer is "NOT {{("000000" + (+current.val).toString(2)).slice(-6)}} = {{("000000" + (+current.val ^ 0x3f).toString(2)).slice(-6)}}"</span>
-    </div>
-  </b>
-</div>
-`
-};
-
-global.qna.bitwise_and = {
-    props: ['valid', 'display_incorrect_answer'],
-    data: function() { return {
-        ans: "",
-        current: {
-            aval: Math.floor(Math.random()*64),
-            bval: Math.floor(Math.random()*64)
-        },
-        update: function() {
-            this.valid = this.ans == ("000000" + (+this.current.aval & this.current.bval).toString(2)).slice(-6);
-            this.$emit('update:valid', this.valid);
-        }
-    };},
-    watch: {
-        ans: function() { this.update(); }
-    },
-    template: `
-<div>
-  <b>
-    <span>{{("000000" + (+current.aval).toString(2)).slice(-6)}} AND <br/>{{("000000" + (+current.bval).toString(2)).slice(-6)}} = </span>
-    <input class="form-control col-form-label-sm inline-input" v-model="ans" :class="!valid && display_incorrect_answer ? 'is-invalid' : ''"></input>
-    <div v-if="!valid && display_incorrect_answer">
-        <span class="text-danger">The correct answer is "{{("000000" + (+current.aval).toString(2)).slice(-6)}} AND {{("000000" + (+current.bval).toString(2)).slice(-6)}} = {{("000000" + (+current.aval & current.bval).toString(2)).slice(-6)}}"</span>
-    </div>
-  </b>
-</div>
-`
-};
-
-global.qna.bitwise_or = {
-    props: ['valid', 'display_incorrect_answer'],
-    data: function() { return {
-        ans: "",
-        current: {
-            aval: Math.floor(Math.random()*64),
-            bval: Math.floor(Math.random()*64)
-        },
-        update: function() {
-            this.valid = this.ans == ("000000" + (+this.current.aval | this.current.bval).toString(2)).slice(-6);
-            this.$emit('update:valid', this.valid);
-        }
-    };},
-    watch: {
-        ans: function() { this.update(); }
-    },
-    template: `
-<div>
-  <b>
-    <span>{{("000000" + (+current.aval).toString(2)).slice(-6)}} OR <br/>{{("000000" + (+current.bval).toString(2)).slice(-6)}} = </span>
-    <input class="form-control col-form-label-sm inline-input" v-model="ans" :class="!valid && display_incorrect_answer ? 'is-invalid' : ''"></input>
-    <div v-if="!valid && display_incorrect_answer">
-        <span class="text-danger">The correct answer is "{{("000000" + (+current.aval).toString(2)).slice(-6)}} OR {{("000000" + (+current.bval).toString(2)).slice(-6)}} = {{("000000" + (+current.aval | current.bval).toString(2)).slice(-6)}}"</span>
-    </div>
-  </b>
-</div>
-`
-};

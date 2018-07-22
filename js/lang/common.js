@@ -8,6 +8,7 @@ global.main_navbar = [
     {name: 'Learn', url: '/learn/'},
     {name: 'TRM', url: '/trm/'}
   ];
+global.main_navbar_home = "/";
 
 // Why use this? Simple: An "if" statement evaluates 0 to false as well, so
 // checking for "safe" numbers doesn't work. It might be a bit over used though...
@@ -695,8 +696,6 @@ function vue_init() {
 }
 
 function core_init() {
-    global.speed.speed_name = "Really Slow";
-    
     global.load_options();
     
     // The speed controller will default to a useable value if the one in the

@@ -24,43 +24,38 @@
 <p>Notice that below you now can see all eight registers. Note that R7 says "Line" to mean the current line location.</p>
 <p>Here you can try out some "<code>mov</code>" instructions! I've given you a view of all eight registers so you can see what's going on, except that since r7 is used to store the location where the computer is looking instructions, it says "Line." You don't need to worry about it right now. Anyway, have fun and remember to put "<code>halt</code>" at the end of your program!</p>
 
-<script type="text/javascript">
-    if(!system_init("mov", languages.learnasm)) {
-        global.alert_manager.error("Load Error", "Language not found or is corrupt. This is a massive bug.");
-    } else {
-        global.systems.mov.asm_text = "";
-    }
-</script>
-<center><div class="card border-primary mb-3" style="max-width: 40rem; text-align: left;">
-  <div class="card-header">
-    <ctrl-button-panel :system="systems.mov" :global="this">
-  </ctrl-button-panel></div>
-  <div class="card-body" style="padding: 0px; margin-right: 5px;">
-    <div class="row">
-      <div class="col-sm-6 col-md-3" v-for="i in [0,1,2,3]"><table class="table table-hover">
-        <thead>
-          <tr>
-            <th scope="col">Register</th>
-            <th scope="col">Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row">R{{0+i*2}}</th>
-            <td>{{systems.mov.cpu.registers[0+i*2]}}</td>
-          </tr>
-          <tr>
-            <th scope="row">R{{1+i*2}}</th>
-            <td>{{i == 3 ? "Line" : systems.mov.cpu.registers[1+i*2]}}</td>
-          </tr>
-        </tbody>
-      </table></div>
+<system-container sysname="mov" default_code=""><template slot-scope="container">
+  <center><div class="card border-primary mb-3" style="max-width: 40rem; text-align: left;">
+    <div class="card-header">
+      <ctrl-button-panel :system="container.system" :global="$root">
+    </ctrl-button-panel></div>
+    <div class="card-body" style="padding: 0px; margin-right: 5px;">
+      <div class="row">
+        <div class="col-sm-6 col-md-3" v-for="i in [0,1,2,3]"><table class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Register</th>
+              <th scope="col">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">R{{0+i*2}}</th>
+              <td>{{container.system.cpu.registers[0+i*2]}}</td>
+            </tr>
+            <tr>
+              <th scope="row">R{{1+i*2}}</th>
+              <td>{{i == 3 ? "Line" : container.system.cpu.registers[1+i*2]}}</td>
+            </tr>
+          </tbody>
+        </table></div>
+      </div>
     </div>
-  </div>
-  <div class="card-body" style="padding: 0px;">
-    <core-pane-code :system="systems.mov" :activelines="systems.mov.active_lines"></core-pane-code>
-  </div>
-</div></center>
+    <div class="card-body" style="padding: 0px;">
+      <core-pane-code :system="systems.mov" :activelines="systems.mov.active_lines"></core-pane-code>
+    </div>
+  </div></center>
+</template></system-container>
 
 <p>You may have noticed that the registers save their values even when you run the program a second time. When programming, you cannot expect <i>anything.</i> These registers may be zero at the start, they may be the value you last set them to, or they may be the value that another program put in there. If you want the registers to default to anything, you must set them first.</p>
 

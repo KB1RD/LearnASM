@@ -36,24 +36,25 @@
   </head>
   
   <body>
-    <div id="vue-container">
+    <div id="vue-container"><system-container sysname="global" default_code="halt" cookie="code"><template slot-scope="container">
+      
       <notification-overlay :alert_manager="alert_manager"></notification-overlay>
       <options-modal :options="options"></options-modal>
       
       <dialog-modal id="dialog-modal" :title="alert_manager.dialog.title" :body="alert_manager.dialog.body" :btns="alert_manager.dialog.btns"></dialog-modal>
       
-      <custom-navbar :version="version" :links="main_navbar">
+      <custom-navbar :version="version" :links="main_navbar" :home="main_navbar_home">
         <!-- FILE BUTTON GROUP -->
-        <ctrl-file-menu :system="systems.global" :options_modal="'#options-modal'"></ctrl-file-menu>
+        <ctrl-file-menu :system="container.system" :options_modal="'#options-modal'"></ctrl-file-menu>
         
-        <ctrl-button-panel :system="systems.global" :global="this"></ctrl-button-panel>
+        <ctrl-button-panel :system="container.system" :global="$root"></ctrl-button-panel>
       </custom-navbar>
       
       <div class="content-container">
         <div style="height: 100%">
           <div id="lpane" class="split split-horizontal">
             <div id="apane" class="split content flex-container">
-              <core-pane-code :system="systems.global" :activelines="systems.global.active_lines"></core-pane-code>
+              <core-pane-code :system="container.system" :activelines="container.system.active_lines"></core-pane-code>
             </div>
             <div id="bpane" class="split content">
               <core-pane-mem></core-pane-mem>
@@ -64,28 +65,16 @@
               <core-pane-io></core-pane-io>
             </div>
             <div id="dpane" class="split content" style="overflow: auto;">
-              <component :is="systems.global.visual_component" :cpu="systems.global.cpu"></component>
+              <component :is="container.system.visual_component" :cpu="container.system.cpu"></component>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </template></system-container></div>
     
     <!-- Core Init -->
     <script type="text/javascript">
         $(document).ready(function() {
-          if(!system_init("global", languages.learnasm)) {
-              global.alert_manager.error("Load Error", "Language not found or is corrupt. This is a massive bug.");
-          } else {
-              var code = cookie_manager.load_json_cookie("code");
-              if(typeof code == 'string' || code instanceof String) {
-                  global.systems["global"].asm_text = code;
-              } else {
-                  global.systems["global"].asm_text = global.systems["global"].default_asm_text;
-              }
-          }
-          
-          // Vue.JS is loaded AFTER all the systems have been initalized
           core_init();
           
           Split(['#lpane', '#rpane'], {
@@ -107,7 +96,6 @@
         });
 
         window.addEventListener("beforeunload", function(e){
-          cookie_manager.save_json_cookie("code", global.systems["global"].asm_text);
           global.save_options();
         }, false);
     </script>
