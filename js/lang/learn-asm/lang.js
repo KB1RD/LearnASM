@@ -862,7 +862,7 @@ languages.learnasm.make_cpu = function(system) { return {
         cpsr_n: 0x1 << 2,
         cpsr_z: 0x1 << 3,
         cpsr_c: 0x1 << 0,
-        cpsr_v: 0x2 << 1
+        cpsr_v: 0x1 << 1
     },
     
     registers: [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0],
@@ -1073,7 +1073,7 @@ languages.learnasm.make_cpu = function(system) { return {
         // Fetch instruction
         var instruction = this.fetch_instruction();
         if(!isSafe(instruction)) { return; }
-        debug(instruction.toString(16));
+        debug("Instruction: "+instruction.toString(16));
         
         // Every instruction starts with pc += (1 instruction)
         this.increment_pc();
@@ -1186,16 +1186,24 @@ languages.learnasm.make_cpu = function(system) { return {
         // Update flags
         if(this.bits(instruction, 11, 1) == 1) {
             this.visual_info.flags_updated = true;
-            this.cpsr &= !(this.constants.cpsr_c | this.constants.cpsr_v 
-                            | this.constants.cpsr_n | this.constants.cpsr_z);
+            this.cpsr = 0;
             
-            if((out & 0x0000FFFF) != out) { this.cpsr |= this.constants.cpsr_c; }
-            if((out & 0xFFFF7FFF) != out) { this.cpsr |= this.constants.cpsr_v; }
+            // Update C
+            if((out & 0xFFFF0000) > 0) { this.cpsr |= this.constants.cpsr_c; }
             
+            // Now that we've detected carry, we can remove unused bits
             out &= 0x0000FFFF;
             
-            if(out == 0)                { this.cpsr |= this.constants.cpsr_z; }
-            if((out & 0x00008000) == 1) { this.cpsr |= this.constants.cpsr_n; }
+            // Update V
+            if( (((src0 ^ src1) & 0x00008000) ^ (out & 0x00008000)) > 0 &&
+                  opcode > 0x3 && opcode < 0xA && opcode != 0x6 && opcode != 0x8) {
+                this.cpsr |= this.constants.cpsr_v;
+            }
+            
+            // Update Z
+            if(out == 0) { this.cpsr |= this.constants.cpsr_z; }
+            // Update N
+            if((out & 0x00008000) > 0) { this.cpsr |= this.constants.cpsr_n; }
         } else {
             this.visual_info.flags_updated = false;
             out &= 0x0000FFFF;

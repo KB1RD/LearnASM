@@ -190,8 +190,7 @@ Vue.component('system-container', {
         
         return {system: global.systems[sysname]};
     },
-    destroyed: function() {
-        var sysname = this["_props"].sysname;
+    beforeDestroy: function() {
         var verify_string = function(code, error_cb) {
             if(code && typeof code == 'string' || code instanceof String) {
                 return code;
@@ -200,10 +199,10 @@ Vue.component('system-container', {
             }
         };
     
-        cookie = verify_string(cookie, function() { return undefined; });
+        cookie = verify_string(this["_props"].cookie, function() { return undefined; });
         
         if(cookie) {
-            cookie_manager.save_json_cookie("code", global.systems[sysname].asm_text);
+            cookie_manager.save_json_cookie(cookie, this.system.asm_text);
         }
     },
     template: `
@@ -216,10 +215,29 @@ Vue.component('system-container', {
 
 Vue.use(window.VueCodemirror);
 Vue.component('core-pane-code', {
-    data: function(){ return { old_active_lines: [] }; },
+    data: function(){ return { 
+        old_active_lines: [],
+        // Clears the classes of all lines. Called when text is modified since
+        // the line numbers will not be the same. Thus, all text must be
+        // cleared to avoid old highlights just hanging out.
+        // It's kinda stupid, but what else am I supposed to do!??
+        clear_all_lines: function(c_txt, act_lines, $refs) {
+            var cm = $refs.codemirror_instance._data.codemirror;
+            
+            // Don't fluch all lines classes if there are no highlighted lines
+            if(act_lines.length != 0) {
+                var lines = c_txt.split("\n").length - 1;
+                for(var i = 0; i<lines; i++) {
+                    cm.removeLineClass(i+1, "wrap", "CodeMirror-activeline");
+                    cm.removeLineClass(i+1, "background", "CodeMirror-activeline-background");
+                    cm.removeLineClass(i+1, "gutter", "CodeMirror-activeline-gutter");
+                }
+            }
+        }
+    }; },
     props: ['system','activelines'],
     template: `
-<codemirror style="width: 100%; height: 100%; filter: darken(10%);" ref="codemirror_instance" v-model="system.asm_text" :options="system.codemirror_options" v-bind:disabled="system.state != system.states.STOPPED"></codemirror>
+<codemirror style="width: 100%; height: 100%; filter: darken(10%);" ref="codemirror_instance" v-model="system.asm_text" :options="system.codemirror_options" v-bind:disabled="system.state != system.states.STOPPED" @input="clear_all_lines(system.asm_text, old_active_lines, $refs)"></codemirror>
 `,
     watch: {
         "activelines": function(ln_new) {
