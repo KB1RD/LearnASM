@@ -40,6 +40,7 @@ function make_copy(obj) {
     return Object.assign(blank, obj);
 }
 
+// A function that's basically
 function parseIntExtended(str) {
     if(str.startsWith("0b")) {
         // I have no idea why JS doesn't support this
@@ -272,7 +273,7 @@ var make_memory_manager = Object.freeze(function() { return {
     
     // Read functions
     read8: function(index) {
-        var output = this.memory_map[index];
+        var output = this.memory_map[this.constrain(index)];
         if(!isSafe(output)) { return undefined; }
         var cb = output.callback;
         if(!isSafe(cb)) { return undefined; }
@@ -299,7 +300,7 @@ var make_memory_manager = Object.freeze(function() { return {
     
     // Write functions
     write8: function(index, val) {
-        var output = this.memory_map[index];
+        var output = this.memory_map[this.constrain(index)];
         if(!isSafe(output)) { return false; }
         var cb = output.callback;
         if(!isSafe(cb)) { return false; }
@@ -317,7 +318,7 @@ var make_memory_manager = Object.freeze(function() { return {
     
     // Functions to find line index at a memory address
     readline8: function(index) {
-        var output = this.memory_map[index];
+        var output = this.memory_map[this.constrain(index)];
         if(!isSafe(output)) { return []; }
         var cb = output.getline;
         if(!isSafe(cb)) { return []; }
@@ -560,9 +561,12 @@ var make_system = Object.freeze(function() { return {
                 if(!this.cpu.init(image)) {
                     return;
                 }
+                // Un-highlight old active lines
+                this.active_lines.splice(0, this.active_lines.length);
             }
             
             this.codemirror_options.readOnly = "nocursor";
+            
             this.timer = setInterval(function(system) {
                 try {
                     system.cpu.cycle();
@@ -680,9 +684,16 @@ var vm;
 
 function vue_init() {
     vm = new Vue({
-      el: "#vue-container",
-      data: global
+        el: "#vue-container",
+        data: global
     });
+    
+    window.addEventListener("beforeunload", function(e){
+        // Destroy calls all the destroy functions in all the components, too
+        // This allows the system container, for example, to save the current
+        // code cookies.
+        vm.$destroy();
+    }, false);
     
     var update_debug_func = function(new_obj,old_obj) {
         if(isSafe(new_obj) && new_obj == true) {
@@ -696,10 +707,10 @@ function vue_init() {
 }
 
 function core_init() {
+    // The speed controller's value will not change if the cookie's speed name
+    // is invalid since the attempted update will be ignored by the proxy
+    global.speed.speed_hz = 1;
     global.load_options();
-    
-    // The speed controller will default to a useable value if the one in the
-    // options variable is undefined or not in the speed list
     global.speed.speed_name = global.options.speed_name;
     
     vue_init();
