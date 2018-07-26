@@ -1,12 +1,16 @@
+
 # LearnASM
-An educational assembly code simulator
+
+> An educational assembly code simulator in your web browser
 
 ## Getting Started
 Play with the simulator: https://learnasm.kb1rd.net/
 
 Read the TRM: https://learnasm.kb1rd.net/trm/
 
-Learn how to code: Coming Soon!
+Learn how to code: https://learnasm.kb1rd.net/learn
+
+Building: See below ([Build Setup](#build-setup))
 
 ## Goals
 In the Spring of 2017 I undertook a project that I initially thought required assembly, so I learned ARM assembly. While I did not end up needing assembly code to complete this project, I discovered that learning assembly code had actually made me a better programmer. Now I can actually understand *why* pointer variables work, for example.
@@ -33,3 +37,27 @@ This project uses a massive number of libraries, without which this simply would
 
 ### Modifications to Libraries
 - I modified the Bootswatch Themes to remove Google fonts
+
+## Build Setup
+
+``` bash
+# install dependencies
+npm install
+
+# serve with hot reload at localhost:8080
+npm run dev
+
+# build for production with minification
+npm run build
+
+# build for production and view the bundle analyzer report
+npm run build --report
+
+# run unit tests (currently not implemented)
+npm run unit
+
+# run all tests
+npm test
+```
+
+For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).

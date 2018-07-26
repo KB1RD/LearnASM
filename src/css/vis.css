@@ -1,0 +1,43 @@
+.vis-path {
+  fill: none;
+  stroke: #000;
+  stroke-width: 8px;
+}
+.vis-path[disabled] {
+  stroke: #ccc;
+}
+
+.vis-path-sm {
+  fill: none;
+  stroke: #000;
+  stroke-width: 4px;
+}
+.vis-path-sm[disabled] {
+  stroke: #ccc;
+}
+
+.vis-path-arrowstart {
+  marker-start: url(#vis-arrow-active);
+}
+.vis-path-arrowstart[disabled] {
+  marker-start: url(#vis-arrow-disabled);
+}
+.vis-path-arrowend {
+  marker-end: url(#vis-arrow-active);
+}
+.vis-path-arrowend[disabled] {
+  marker-end: url(#vis-arrow-disabled);
+}
+
+#vis-arrow-active > path {
+  fill-rule: evenodd;
+  stroke: #000;
+  fill: #000;
+  stroke-width: .4pt;
+}
+#vis-arrow-disabled > path {
+  fill-rule: evenodd;
+  stroke: #ccc;
+  fill: #ccc;
+  stroke-width: .4pt;
+}

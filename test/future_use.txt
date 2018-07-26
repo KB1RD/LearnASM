@@ -1,0 +1,2 @@
+I added test functionality via Vue-CLI so it can be used if needed. Right now,
+this does nothing.

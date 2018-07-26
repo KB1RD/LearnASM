@@ -1,9 +1,0 @@
-User-Agent: *
-Disallow: /learn/*          # Don't index files *inside* the learn directory
-Allow: /learn/index.html    # But still index the learn home
-Disallow: /css              # Don't index scripts/css
-Disallow: /js
-Disallow: /codemirror
-Disallow: /LICENSE          # Don't index GitHub stuff
-Disallow: /README.md
-Disallow: /CNAME
