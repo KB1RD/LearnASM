@@ -2,6 +2,7 @@
   <div id="app" class="theme-light">
     <AlertManager :alert_manager="alert_manager"></AlertManager>
     <OptionsModal/>
+    <IntroModal/>
     
     <router-view class="view" :alert_manager="alert_manager" :version="version" :navbar_links="main_navbar" :home_url="nav_home"></router-view>
   </div>
@@ -12,6 +13,7 @@ import '@/js/globals.js'
 import {options, loadOptions, saveOptions, CookieManager, FileManager} from '@/js/io.js'
 import AlertManager from '@/components/UI/AlertManager.vue'
 import OptionsModal from '@/components/UI/OptionsModal.vue'
+import IntroModal from '@/components/UI/IntroModal.vue'
 
 loadOptions()
 
@@ -24,13 +26,17 @@ var updateDebug = function() {
 }
 updateDebug()
 
+if(!options.no_welcome) {
+  options.no_welcome = false
+}
+
 window.alert_manager = AlertManager.create_manager()
 
 export default {
   name: 'LearnASM',
   
   components: {
-    AlertManager, OptionsModal
+    AlertManager, OptionsModal, IntroModal
   },
   
   data () {  return {

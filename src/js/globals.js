@@ -1,5 +1,11 @@
 // These are used so frequently that they should be exported to the window scope
 
+$('body').on('keydown', 'input, select', function(e) {
+    if(e.which == 13) {
+      $(this).nextAll('input, select, button').first().focus();
+    }
+});
+
 // Why use this? Simple: An "if" statement evaluates 0 to false as well, so
 // checking for "safe" numbers doesn't work. It might be a bit over used though...
 window.isSafe = function(val) {
@@ -31,8 +37,21 @@ window.make_copy = function(obj) {
 }
 
 // A function that's basically parseInt but that supports 0b
+// This will also reject decimals
 window.parseIntExtended = function(str) {
-    if(str.startsWith("0b")) {
+    if(!isSafe(str)) {
+        return NaN;
+    }
+    
+    if(Number.isInteger(str)) {
+        return str;
+    }
+    
+    if(str.indexOf('.') != -1) {
+        return undefined;
+    }
+    
+    if(str.startsWith('0b')) {
         // I have no idea why JS doesn't support this
         return parseInt(str.substr(2, str.length), 2);
     } else {

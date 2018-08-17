@@ -67,8 +67,9 @@ export default {
       this.alert_manager.error("Load Error", "Language not found or is corrupt. This is a massive bug.");
     }
     
+    system.asm_text = "halt"
     var code = CookieManager.load_json_cookie(codeCookieName)
-    if(code) {
+    if(code && (typeof code === 'string' || code instanceof String)) {
       system.asm_text = code.toString()
     }
     

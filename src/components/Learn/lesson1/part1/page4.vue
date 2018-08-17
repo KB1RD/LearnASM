@@ -6,7 +6,15 @@
   <LearnInlineCode>mov r3, r5</LearnInlineCode>
   <p>Remember that the destination always comes first! Now, try that practice again, but with some register-to-register "<LearnInlineCode>mov</LearnInlineCode>"s thrown in:</p>
   <LearnPractice :question_count="5" :question_controllers="[qna.PracticeMovIMM, qna.PracticeMovR2R, qna.PracticeMovR2R]"></LearnPractice>
-
+  
+  <h3>Move or copy?</h3>
+    <p>The name <LearnInlineCode>mov</LearnInlineCode> is somewhat inaccurate. The <LearnInlineCode>mov</LearnInlineCode> instruction doesn't actually <i>move</i> data. More accurately, it copies it, so the original data stays right where it is. So if I wrote...</p>
+  <LearnInlineCode>
+mov r0, #5
+mov r1, r0
+  </LearnInlineCode>
+  <p>...then <LearnInlineCode>r0</LearnInlineCode> would be 5 and <LearnInlineCode>r1</LearnInlineCode> would also be 5. This can be a bit confusing, so it might be more helpful to remember this: LearnASM instructions always change only one register and that is the destination. Everything else will stay the same.</p>
+  
   <h3>Chains of "<LearnInlineCode>mov</LearnInlineCode>"s</h3>
   <p>Remember that the value of a register will always be the value from the last instruction that wrote to it. However, with instructions that reference registers that have already <LearnInlineCode>mov</LearnInlineCode>-ed to, the new register value will be the value of the instruction <i>at that particular time.</i> This may seem confusing, but look at the example below:</p>
   <LearnInlineCode>

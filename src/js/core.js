@@ -34,17 +34,17 @@ var make_speed_controller = function(sp_list, on_speed_change) {
                         speed_cb();
                         return true;
                     }
-                    return false;
+                    return true;
                 case "speed_hz":
                     if(val && isSafe(speeds_reverse[val])) {
                         obj.speed_name = speeds_reverse[val];
                         speed_cb();
                         return true;
                     }
-                    return false;
+                    return true;
                 case "speed_ms":
                     if(!val) {
-                        return false;
+                        return true;
                     }
                     var speed_hz = 1000/val;
                     if(isSafe(speeds_reverse[speed_hz])) {
@@ -52,7 +52,7 @@ var make_speed_controller = function(sp_list, on_speed_change) {
                         speed_cb();
                         return true;
                     }
-                    return false;
+                    return true;
                 default:
                     return false;
             }
