@@ -1,7 +1,7 @@
 <template>
 <div>
   <h3>Try this...</h3>
-  <p>Try <LearnInlineCode>mov</LearnInlineCode>-ing the number 100000 into r0. Thats 100,000 or a one with five zeroes. But don't forget to <LearnInlineCode>halt</LearnInlineCode>!</p>
+  <p>Try <LearnInlineCode>mov</LearnInlineCode>-ing the number 100000 into r0. That's 100,000 or a one with five zeroes. But don't forget to <LearnInlineCode>halt</LearnInlineCode>!</p>
   
   <center><div class="card border-primary mb-3" style="max-width: 40rem; text-align: left;">
     <div class="card-header">
