@@ -645,7 +645,7 @@ lang_object.make_assembler = function(system) { return {
     // ------------------------------------------------------------------------
     
     translate_directive: function(cline, image_map, labels) {
-        parts = cline.split(" ");
+        var parts = cline.split(" ");
         
         debug("Found directive "+parts[0]);
         

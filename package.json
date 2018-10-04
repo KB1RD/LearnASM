@@ -10,7 +10,7 @@
     "test": "npm run unit",
     "lint": "eslint --ext .js,.vue src test/unit",
     "build": "node build/build.js",
-    "update-gh-pages": "rm -rf dist; mkdir dist; git clone -b gh-pages 'https://github.com/KB1RD/LearnASM.git' dist; rm -rf dist/*; npm run build; cp siteinfo/* dist/; cd dist; git add -u *; git add -u; git commit -m 'Updated the gh-pages site'; git push origin gh-pages; cd .."
+    "update-gh-pages": "rm -rf dist; mkdir dist; git clone -b gh-pages 'https://github.com/KB1RD/LearnASM.git' dist; rm -rf dist/*; npm run build; cp siteinfo/* dist/; cd dist; git add *; git add -u *; git add -u; git commit -m 'Updated the gh-pages site'; git push origin gh-pages; cd .."
   },
   "dependencies": {
     "bootstrap": "^4.1.2",
