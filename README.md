@@ -1,3 +1,4 @@
+**NOTE:** Development on this project is *painfully* slow because I am so busy with high school. If you'd like to help out, (if anyone actually knows this exists) feel free to submit a pull request, but it may be a little while before I see it. The issues section is a good place to start.
 
 # LearnASM
 
