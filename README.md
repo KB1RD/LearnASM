@@ -11,6 +11,10 @@ Read the TRM: https://learnasm.kb1rd.net/trm/
 
 Learn how to code: https://learnasm.kb1rd.net/learn
 
+Examples: https://github.com/KB1RD/LearnASM/wiki/Example-Code
+
+An explanation of how things work: https://github.com/KB1RD/LearnASM/wiki/How-it-works-(CPU-&-Assembler)
+
 Building: See below ([Build Setup](#build-setup))
 
 ## Goals
